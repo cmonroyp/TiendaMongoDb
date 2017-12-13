@@ -95,8 +95,23 @@ function loginUser(req,res){
 
 function searchUserId(req,res){
 
-    var params = req.body;
-    console.log(params)
+    var userId = req.params.id;
+    console.log(userId)
+
+    User.findById(userId,(err,findUser)=>{
+
+        if(err){
+            res.status(500).send({message:'Error Buscando el Usuario'});
+        }
+        else{
+            if(!findUser){
+                res.status(404).send({message:'No existe el Usuario!.'});
+            }
+            else{
+                res.status(200).send({user: findUser});
+            }
+        }
+    })
 }
 
 function updateUser(req,res){
@@ -124,5 +139,6 @@ module.exports ={
     pruebasControlador,
     addUser,
     loginUser,
+    searchUserId,
     updateUser
 }
