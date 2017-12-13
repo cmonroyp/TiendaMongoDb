@@ -4,6 +4,10 @@ var bcrypt = require('bcrypt-nodejs');
 var User = require('../models/user');
 var jwt = require('../services/jwt');
 
+//manipular archivos
+const fs = require('fs');
+var path = require('path');
+
 function pruebasControlador(req,res){
 
     res.status(200).send({message:'probando controlador de usuario'});
@@ -17,6 +21,7 @@ function addUser(req,res){
     user.firstName = params.firstName;
     user.surName = params.surName;
     user.email = params.email;
+    user.image = params.image;
     //user.password = params.password;
     user.role = params.role;
 
@@ -135,10 +140,67 @@ function updateUser(req,res){
     })
 }
 
+function uploadImage(req,res){
+
+    var userId = req.params.id;
+    var file_name ='No Subida..';
+
+    if(req.files){
+        var file_path = req.files.image.path;
+        //extraemos el nombre de toda la imagen
+        var file_split = file_path.split('\\');
+        var file_name = file_split[2];
+
+        //extraemos solo la extension de la imagen
+        var ext_split = file_name.split('\.');
+        var file_ext = ext_split[1];
+
+        if(file_ext =='jpg' || file_ext == 'png'){
+
+            User.findByIdAndUpdate(userId,{image:file_name},(err,userUpdate)=>{
+
+                if(!userUpdate){
+                    res.status(404).send({message:'No se ha podido actualizar el usuario con la Imagen!.'});
+                }
+                else{
+                    res.status(200).send({user:userUpdate});
+                }
+            })
+        }
+        else{
+            res.status(200).send({message:'Formato de imagen no Soportado!.'});
+            //metodo para eliminar el archivo en caso que no sea la extension.
+            fs.unlinkSync(file_path);
+            console.log('successfully deleted',file_path);
+        }
+        console.log(file_path);
+    }
+    else{
+        res.status(200).send({message:'No se ha subido ninguna imagen.'});
+    }
+}
+
+function getImageFile(req,res){
+
+    var imageFile = req.params.imageFile;
+    var path_file = './uploads/users/' + imageFile;
+
+    if(fs.existsSync(path_file)) {
+
+        res.sendFile(path.resolve(path_file));
+    }
+    else{
+        res.status(500).send({message:'No existe la iamgen.'});
+    }
+    
+}
+
 module.exports ={
     pruebasControlador,
     addUser,
     loginUser,
     searchUserId,
-    updateUser
+    updateUser,
+    uploadImage,
+    getImageFile
 }
