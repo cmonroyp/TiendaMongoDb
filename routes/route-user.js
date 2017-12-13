@@ -15,6 +15,6 @@ api.post('/login',UserController.loginUser);
 api.post('/search-userId/:id',md_auth.ensureAuth,UserController.searchUserId);
 api.put('/update-user/:id',md_auth.ensureAuth,UserController.updateUser);
 api.post('/upload-image/:id',[md_auth.ensureAuth,md_upload],UserController.uploadImage);//con md_upload se recogen las variables que lleguen por files.
-api.get('/get-image/:imageFile',UserController.getImageFile);
+api.get('/get-image/:imageFile',md_auth.ensureAuth,UserController.getImageFile);
 
 module.exports = api;
